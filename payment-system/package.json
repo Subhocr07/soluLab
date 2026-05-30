@@ -1,0 +1,37 @@
+{
+  "name": "payment-processing-system",
+  "version": "1.0.0",
+  "description": "Backend Assignment: Payment Processing System with retry, idempotency, and concurrency control",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "test:coverage": "jest --coverage --runInBand --detectOpenHandles --forceExit",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:migrate:status": "sequelize-cli db:migrate:status"
+  },
+  "dependencies": {
+    "async-mutex": "^0.4.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "pg": "^8.21.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
+    "umzug": "^3.8.3",
+    "uuid": "^9.0.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "sequelize-cli": "^6.6.5",
+    "sqlite3": "^6.0.1",
+    "supertest": "^6.3.3"
+  }
+}

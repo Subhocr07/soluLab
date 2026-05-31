@@ -4,8 +4,8 @@
   "description": "Backend Assignment: Payment Processing System with retry, idempotency, and concurrency control",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node init && node src/app.js",
+    "dev": "node init && nodemon src/app.js",
     "test": "jest --runInBand --detectOpenHandles --forceExit",
     "test:coverage": "jest --coverage --runInBand --detectOpenHandles --forceExit",
     "db:migrate": "sequelize-cli db:migrate",

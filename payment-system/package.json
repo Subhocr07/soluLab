@@ -11,7 +11,10 @@
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
-    "db:migrate:status": "sequelize-cli db:migrate:status"
+    "db:migrate:status": "sequelize-cli db:migrate:status",
+    "test:api": "node scripts/test.js",
+    "test:api:payment": "node scripts/test.js payment",
+    "test:api:webhook": "node scripts/test.js webhook"
   },
   "dependencies": {
     "async-mutex": "^0.4.0",

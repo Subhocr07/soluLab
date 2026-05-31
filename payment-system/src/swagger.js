@@ -35,6 +35,7 @@ A robust payment processing system that simulates real-world gateway behaviour.
       { name: 'Payments', description: 'Payment lifecycle endpoints' },
       { name: 'Webhooks', description: 'Gateway callback endpoint' },
       { name: 'System', description: 'Health and metrics' },
+      { name: 'Developer', description: '🔧 Dev-only tools — not available in production. Simulate gateway webhooks without manual signature generation.' },
     ],
 
     // ── Reusable schemas ────────────────────────────────────────────────────
@@ -472,6 +473,104 @@ $hash   = $hmac.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($body))
               content: {
                 'application/json': {
                   example: { success: true, status: 'healthy', timestamp: '2026-05-30T14:00:00.000Z' },
+                },
+              },
+            },
+          },
+        },
+      },
+
+      '/dev/trigger-webhook': {
+        post: {
+          tags: ['Developer'],
+          summary: '🔧 Trigger a signed webhook (dev only)',
+          description: `
+Simulates the payment gateway sending a signed webhook callback to your server.
+
+**Equivalent to:**
+- Stripe Dashboard → Developers → Webhooks → "Send test webhook"
+- \`stripe trigger payment_intent.succeeded\` (Stripe CLI)
+
+The server signs the payload internally using \`WEBHOOK_SECRET\` — no manual signature needed.
+
+**Not available in production.**
+          `,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['paymentId', 'status'],
+                  properties: {
+                    paymentId: { type: 'string', format: 'uuid', example: 'PASTE-PAYMENT-ID-HERE' },
+                    status: { type: 'string', enum: ['APPROVED', 'DECLINED', 'PROCESSING'], example: 'APPROVED' },
+                    transactionId: { type: 'string', example: 'txn_gateway_001', description: 'Use with APPROVED' },
+                    errorCode: { type: 'string', example: 'INSUFFICIENT_FUNDS', description: 'Use with DECLINED' },
+                  },
+                },
+                examples: {
+                  approved: {
+                    summary: 'Gateway approves payment',
+                    value: { paymentId: 'PASTE-PAYMENT-ID-HERE', status: 'APPROVED', transactionId: 'txn_gateway_001' },
+                  },
+                  declined: {
+                    summary: 'Gateway declines payment',
+                    value: { paymentId: 'PASTE-PAYMENT-ID-HERE', status: 'DECLINED', errorCode: 'INSUFFICIENT_FUNDS' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: 'Webhook fired — shows payload, auto-generated signature, and updated payment',
+              content: {
+                'application/json': {
+                  example: {
+                    success: true,
+                    message: 'Webhook "APPROVED" triggered for payment a1b2...',
+                    debug: {
+                      payload: { paymentId: 'a1b2...', status: 'APPROVED', transactionId: 'txn_001', timestamp: '2026-05-31T10:00:00Z' },
+                      signature: 'abc123def456...',
+                      rawBody: '{"paymentId":"a1b2...","status":"APPROVED",...}',
+                      webhookHttpStatus: 200,
+                    },
+                    data: { id: 'a1b2...', status: 'SUCCESS', transactionId: 'txn_001' },
+                  },
+                },
+              },
+            },
+            400: { description: 'Missing paymentId or invalid status' },
+          },
+        },
+      },
+
+      '/dev/webhook-secret': {
+        get: {
+          tags: ['Developer'],
+          summary: '🔧 Get webhook signing secret (dev only)',
+          description: `
+Returns the current \`WEBHOOK_SECRET\`.
+
+**Equivalent to:** Stripe Dashboard → Developers → Webhooks → Signing secret
+
+**Not available in production.**
+          `,
+          responses: {
+            200: {
+              description: 'Current webhook signing secret and usage instructions',
+              content: {
+                'application/json': {
+                  example: {
+                    success: true,
+                    data: {
+                      secret: 'change-this-in-production',
+                      usage: 'X-Gateway-Signature = HMAC-SHA256(rawBody, secret)',
+                      algorithm: 'HMAC-SHA256',
+                      encoding: 'hex',
+                    },
+                  },
                 },
               },
             },

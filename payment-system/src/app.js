@@ -30,6 +30,11 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.get('/api/metrics', metrics);
 
+// Developer utilities — not available in production
+if (config.nodeEnv !== 'production') {
+  app.use('/api/dev', require('./routes/devRoutes'));
+}
+
 app.get('/api/health', (req, res) => {
   res.json({ success: true, status: 'healthy', timestamp: new Date().toISOString() });
 });

@@ -31,6 +31,8 @@ module.exports = {
 
   webhook: {
     secret: process.env.WEBHOOK_SECRET || 'default-webhook-secret-change-in-production',
+    // URL the gateway simulation posts callbacks to (defaults to this server)
+    url: process.env.WEBHOOK_URL || `http://localhost:${process.env.PORT || 3000}/api/webhooks/payment`,
   },
 
   database: {

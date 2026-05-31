@@ -3,6 +3,7 @@ const { Mutex } = require('async-mutex');
 const { PaymentStore, PAYMENT_STATUS } = require('../models/paymentStore');
 const { simulateGatewayCall } = require('./gatewayService');
 const { RetryQueue } = require('./retryService');
+const { sendWebhookEvent } = require('./webhookNotificationService');
 const config = require('../config/config');
 const logger = require('../utils/logger');
 const {
@@ -145,6 +146,10 @@ async function _onGatewaySuccess(paymentId, result) {
     message: `Payment approved. Transaction: ${result.transactionId}`,
   });
   logger.info('Payment succeeded', { paymentId, transactionId: result.transactionId });
+
+  // Auto-fire Stripe-like webhook with full payment data
+  const successPayment = await PaymentStore.get(paymentId);
+  if (successPayment) setImmediate(() => sendWebhookEvent(successPayment, 'payment.succeeded'));
 }
 
 async function _onGatewayFailure(paymentId, error) {
@@ -175,6 +180,10 @@ async function _onGatewayFailure(paymentId, error) {
       message: `${reason}: ${error.message}`,
     });
     logger.error('Payment permanently failed', { paymentId, reason, errorCode: error.code });
+
+    // Auto-fire Stripe-like webhook with full payment data
+    const failedPayment = await PaymentStore.get(paymentId);
+    if (failedPayment) setImmediate(() => sendWebhookEvent(failedPayment, 'payment.failed'));
   }
 }
 
